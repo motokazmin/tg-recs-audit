@@ -1,0 +1,18 @@
+# systemd-юнит paperd на хосте бота. Установка — docs/paperd.md.
+[Unit]
+Description=paperd — проверка идей вперёд на виртуальных деньгах
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=user1
+WorkingDirectory=/home/user1/tg-recs-audit
+# ADMIN_TOKEN, TG_BOT_TOKEN, TG_CHAT_ID — тот же файл, что у бота
+EnvironmentFile=/etc/trading-bot/env
+Environment=HTTP_LISTEN=0.0.0.0:8092
+ExecStart=/home/user1/tg-recs-audit/bin/paperd
+Restart=on-failure
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target

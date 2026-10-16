@@ -20,6 +20,7 @@ import (
 	"tg-recs-audit/internal/infra/ledgerfile"
 	"tg-recs-audit/internal/infra/moexiss"
 	"tg-recs-audit/internal/infra/smartlab"
+	"tg-recs-audit/internal/ledger"
 )
 
 // corpActionsPath — ручная таблица сплитов и смен тикеров, коммитится.
@@ -127,13 +128,13 @@ func runPortfolio(o Options, iss *moexiss.Client, out io.Writer) error {
 	if o.NoDividends {
 		name += "-price"
 	}
-	ledger := ledgerfile.File{Path: filepath.Join(dataDir, "ledger", name+".jsonl")}
+	journal := ledgerfile.File{Path: filepath.Join(dataDir, "ledger", name+".jsonl")}
 	cutoff := p.bench[len(p.bench)-1].Day
-	old, err := ledger.Load()
+	old, err := journal.Load()
 	if err != nil {
 		return err
 	}
-	fresh, err := portfolio.Reconcile(old, portfolio.Ops(res), cutoff)
+	fresh, err := ledger.Reconcile(old, portfolio.Ops(res), cutoff)
 	if err != nil {
 		return err
 	}
@@ -142,11 +143,11 @@ func runPortfolio(o Options, iss *moexiss.Client, out io.Writer) error {
 		return err
 	}
 	printRun(out, p, res)
-	printNewOps(out, fresh, ledger.Path, o.Dry)
+	printNewOps(out, fresh, journal.Path, o.Dry)
 	if o.Dry {
 		return nil
 	}
-	return ledger.Append(fresh)
+	return journal.Append(fresh)
 }
 
 // writePositions — все позиции прогона для разбора (локальный файл, не журнал).

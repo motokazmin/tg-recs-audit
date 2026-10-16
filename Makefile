@@ -33,7 +33,23 @@ divevents: $(BIN)
 check-channel: $(BIN)
 	$(BIN) check-channel $(CHANNEL)
 
+# paperd — проверка идей вперёд (docs/paperd.md)
+paperd-build:
+	$(GO) build -o bin/paperd ./cmd/paperd
+	$(GO) build -o $(BIN) ./cmd/recaudit
+
+paperd: paperd-build
+	@if [ -f data/paperd.pid ] && kill -0 $$(cat data/paperd.pid) 2>/dev/null; then echo "paperd уже работает (PID $$(cat data/paperd.pid))"; exit 1; fi
+	nohup bin/paperd > data/paperd.log 2>&1 & echo $$! > data/paperd.pid
+	@echo "paperd запущен (PID $$(cat data/paperd.pid)), лог data/paperd.log"
+
+paperd-stop:
+	@if [ -f data/paperd.pid ]; then kill $$(cat data/paperd.pid) && rm -f data/paperd.pid && echo остановлен; else echo "не запущен"; fi
+
+paperd-status:
+	@if [ -f data/paperd.pid ] && kill -0 $$(cat data/paperd.pid) 2>/dev/null; then echo "работает (PID $$(cat data/paperd.pid))"; tail -5 data/paperd.log; else echo "не запущен"; fi
+
 test:
 	$(GO) test ./...
 
-.PHONY: run houses diary placements signals divevents check-channel test
+.PHONY: run houses diary placements signals divevents check-channel test paperd paperd-build paperd-stop paperd-status

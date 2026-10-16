@@ -13,11 +13,11 @@ import (
 
 	"tg-recs-audit/internal/contract"
 	"tg-recs-audit/internal/feature/diary"
-	"tg-recs-audit/internal/feature/portfolio"
 	"tg-recs-audit/internal/infra/cbr"
 	"tg-recs-audit/internal/infra/ledgerfile"
 	"tg-recs-audit/internal/infra/moexiss"
 	"tg-recs-audit/internal/infra/smartlab"
+	"tg-recs-audit/internal/ledger"
 )
 
 // runDiary — портфель-дневник: повторяем сделки автора (Trendoman).
@@ -134,20 +134,20 @@ func runDiary(o Options, iss *moexiss.Client, out io.Writer) error {
 		return fmt.Errorf("%d проблем — журнал не тронут", len(results[1].Problems))
 	}
 	cutoff := bench[len(bench)-1].Day
-	ledger := ledgerfile.File{Path: filepath.Join(dataDir, "ledger", channelSlug(ref)+"-follower.jsonl")}
-	old, err := ledger.Load()
+	journal := ledgerfile.File{Path: filepath.Join(dataDir, "ledger", channelSlug(ref)+"-follower.jsonl")}
+	old, err := journal.Load()
 	if err != nil {
 		return err
 	}
-	fresh, err := portfolio.Reconcile(old, diary.LedgerOps(results[1], cutoff), cutoff)
+	fresh, err := ledger.Reconcile(old, diary.LedgerOps(results[1], cutoff), cutoff)
 	if err != nil {
 		return err
 	}
-	printNewOps(out, fresh, ledger.Path, o.Dry)
+	printNewOps(out, fresh, journal.Path, o.Dry)
 	if o.Dry {
 		return nil
 	}
-	return ledger.Append(fresh)
+	return journal.Append(fresh)
 }
 
 func printChecks(w io.Writer, cs []diary.Check) {

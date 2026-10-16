@@ -132,12 +132,12 @@ func Evaluate(b Bond, m Market, lqdt []contract.Bar, ns []int) ([]Obs, error) {
 			notPar = px
 		}
 	}
-	y0 := yield20(cal, i0)
+	y0 := Yield20(cal, i0)
 	var out []Obs
 	for _, n := range ns {
 		exit := cal[i0+n].Day
 		o := Obs{Bond: b, N: n, MM: cal[i0+n].Close/cal[i0].Close - 1, Spread: b.Coupon - 100*y0, NotPar: notPar}
-		switch dy := yield20(cal, i0+n) - y0; {
+		switch dy := Yield20(cal, i0+n) - y0; {
 		case dy > 0.01:
 			o.Phase = "растёт"
 		case dy < -0.01:
@@ -173,8 +173,8 @@ func Evaluate(b Bond, m Market, lqdt []contract.Bar, ns []int) ([]Obs, error) {
 	return out, nil
 }
 
-// yield20 — годовая доходность LQDT за 20 торговых дней до i: прокси ключевой ставки.
-func yield20(cal []contract.Bar, i int) float64 {
+// Yield20 — годовая доходность LQDT за 20 торговых дней до i: прокси ключевой ставки.
+func Yield20(cal []contract.Bar, i int) float64 {
 	j := max(0, i-20)
 	days := cal[i].Day.Sub(cal[j].Day).Hours() / 24
 	if days <= 0 {

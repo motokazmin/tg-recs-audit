@@ -14,10 +14,11 @@ import (
 )
 
 // Bonds — все облигации биржи, включая погашенные и дефолтные: без них выборка
-// размещений — выжившие. Кэш навсегда, перекачка — -refresh.
+// размещений — выжившие. Кэш на сутки.
 func (c *Client) Bonds() ([]contract.Security, error) {
 	path := filepath.Join(c.cacheDir, "bonds-universe.json")
-	if !c.refresh {
+	// Список пополняется новыми выпусками — сутки, не навсегда (paperd смотрит размещения вперёд).
+	if st, err := os.Stat(path); !c.refresh && err == nil && (c.Offline || time.Since(st.ModTime()) < 20*time.Hour) {
 		if b, err := os.ReadFile(path); err == nil {
 			var out []contract.Security
 			if json.Unmarshal(b, &out) == nil {

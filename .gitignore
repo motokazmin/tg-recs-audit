@@ -2,3 +2,6 @@ bin/
 data/cache/
 data/analysis/
 data/exports/
+data/paperd.pid
+data/paperd.log
+data/paper/

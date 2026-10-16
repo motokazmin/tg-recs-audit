@@ -191,7 +191,8 @@ func orderBook(board string) bool {
 
 func (c *Client) Shares() ([]contract.Security, error) {
 	path := filepath.Join(c.cacheDir, "universe.json")
-	if !c.refresh {
+	// Сутки: новые эмитенты должны попадать в разбор постов paperd.
+	if st, err := os.Stat(path); !c.refresh && err == nil && (c.Offline || time.Since(st.ModTime()) < 20*time.Hour) {
 		if b, err := os.ReadFile(path); err == nil {
 			var out []contract.Security
 			if json.Unmarshal(b, &out) == nil {

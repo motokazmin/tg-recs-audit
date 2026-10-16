@@ -1,11 +1,14 @@
-package portfolio
+package ledger
 
 import (
 	"strings"
 	"testing"
+	"time"
 
 	"tg-recs-audit/internal/contract"
 )
+
+func d(s string) time.Time { t, _ := time.Parse(time.DateOnly, s); return t }
 
 func op(seq int, day, kind string, price float64) contract.Op {
 	return contract.Op{Seq: seq, Day: day, Kind: kind, SecID: "SBER", Price: price, PostID: int64(seq)}

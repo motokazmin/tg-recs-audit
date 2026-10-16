@@ -22,18 +22,17 @@ import (
 	"tg-recs-audit/internal/contract"
 )
 
-const freshFor = 7 * 24 * time.Hour
-
 type Client struct {
 	cacheDir string
 	Offline  bool
+	FreshFor time.Duration // сколько кэш страницы свежий; по умолчанию неделя (разборы), paperd — сутки
 	http     *http.Client
 	mu       sync.Mutex // smart-lab — сайт, а не API: по одному запросу с паузой
 	pages    map[string][]contract.DividendRow
 }
 
 func New(cacheDir string) *Client {
-	return &Client{cacheDir: cacheDir, http: &http.Client{Timeout: 30 * time.Second}, pages: map[string][]contract.DividendRow{}}
+	return &Client{cacheDir: cacheDir, FreshFor: 7 * 24 * time.Hour, http: &http.Client{Timeout: 30 * time.Second}, pages: map[string][]contract.DividendRow{}}
 }
 
 // Dividends — строки с кодом secid со страницы secid, а для XXXXP — со страницы XXXX.
@@ -64,7 +63,7 @@ func (c *Client) page(ticker string) ([]contract.DividendRow, error) {
 		return r, nil
 	}
 	path := filepath.Join(c.cacheDir, ticker+".json")
-	if st, err := os.Stat(path); err == nil && (c.Offline || time.Since(st.ModTime()) < freshFor) {
+	if st, err := os.Stat(path); err == nil && (c.Offline || time.Since(st.ModTime()) < c.FreshFor) {
 		var rows []contract.DividendRow
 		if b, err := os.ReadFile(path); err == nil && json.Unmarshal(b, &rows) == nil {
 			c.pages[ticker] = rows
