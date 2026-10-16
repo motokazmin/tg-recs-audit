@@ -62,7 +62,7 @@ app.runPortfolio
 | `paper.Runner` | `runner.go` | пересчёт всех стратегий (ночью и по кнопке, не одновременно) → `ledger.Reconcile` → `Append`; прошлое изменилось → «ОСТАНОВЛЕНА» + тревога |
 | `paper.Curve`, `Trades`, `Summarize` | `account.go` | капитал по дням бенчмарка, сделки и превышение из журнала |
 | `paper.Server` | `server.go` | админка: сводка, страница стратегии (SVG, позиции, сделки, журнал), `/api/status`, `POST /run`; токен Bearer / `?access_token=` → cookie |
-| `paperstrat.Dividends`, `Placements` | `internal/feature/paperstrat` | стратегии A, B, C из 0013 |
+| `paperstrat.Dividends`, `Placements`, `OFZAuctions` | `internal/feature/paperstrat` | стратегии A, B, C из 0013 и D из 0018 |
 | `telegram.Alerter` | `internal/infra/telegram` | тревоги; без `TG_*` — только лог |
 
 Сборка (`app.RunPaper`): `paper.ValidateListen` → день старта из `data/paper/start` (пишется
@@ -91,7 +91,8 @@ app.runPortfolio
 Проверка 0006/0007: `moexiss.Bonds` (все облигации, с погашенными) → карточки параллельно
 (`Card`, кэш навсегда) → `placements.Universe` → по выпуску `BondHead` (окно после размещения)
 и `BondFlows` → `placements.Evaluate` против LQDT → сводка с t по неделям размещения.
-`placements.Market` — порт на стороне потребителя. `moexiss.Bonds` — кэш сутки (paperd ждёт новые выпуски).
+`placements.Market` — порт на стороне потребителя. `moexiss.Auctions(day)` — итоги аукционов ОФЗ
+за день (доска PACT, средневзвешенная), `OFZBars` — TQOB с официальным закрытием. `moexiss.Bonds` — кэш сутки (paperd ждёт новые выпуски).
 
 ## Команда `prefetch-shares` и скрипты разборов
 

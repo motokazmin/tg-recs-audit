@@ -4,8 +4,8 @@ import json, os, sys, time, urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CACHE = os.path.join(ROOT, "data/cache/iss/ofz")
-COLS = "TRADEDATE,BOARDID,CLOSE,WAPRICE,ACCINT,FACEVALUE,NUMTRADES,VALUE"
+CACHE = os.path.join(ROOT, "data/cache/iss/ofz2")  # с ценами закрытия и объёмом (0016)
+COLS = "TRADEDATE,BOARDID,OPEN,LOW,CLOSE,LEGALCLOSEPRICE,WAPRICE,ACCINT,FACEVALUE,NUMTRADES,VALUE,VOLUME"
 
 def get(url):
     for i in range(5):

@@ -6,7 +6,7 @@ from eventstats import ROOT, COST, bars, report, criterion, summary, fmt
 HOLD = int(sys.argv[1]) if len(sys.argv) > 1 else 5
 ld, lq = bars(os.path.join(ROOT, "data/cache/iss/shares/LQDT.csv"))
 events = []
-for path in sorted(glob.glob(os.path.join(ROOT, "data/cache/iss/ofz/*.json"))):
+for path in sorted(glob.glob(os.path.join(ROOT, "data/cache/iss/ofz2/*.json"))):
     d = json.load(open(path))
     secid = os.path.basename(path)[:-5]
     rows = [dict(zip(d["columns"], r)) for r in d["history"]]

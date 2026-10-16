@@ -107,6 +107,8 @@ func RunPaper(o PaperOptions) error {
 			StartDay: start, Cap: 1_000_000, PerTrade: 20_000, Universe: iss.Bonds, Card: iss.Card, Bonds: iss, MM: lqdt},
 		&paperstrat.Placements{Slug: "placements-falling", Heading: "Размещения — только при снижении ставки (0012)",
 			StartDay: start, Cap: 1_000_000, PerTrade: 20_000, FallingOnly: true, Universe: iss.Bonds, Card: iss.Card, Bonds: iss, MM: lqdt},
+		&paperstrat.OFZAuctions{StartDay: start, Cap: 1_000_000, PerTrade: 500_000,
+			Auctions: iss.Auctions, Bars: iss.OFZBars, Flows: iss.BondFlows, MM: lqdt},
 	}
 	runner := paper.NewRunner(o.Dir, strategies, telegram.FromEnv())
 	srv := &http.Server{Addr: o.Listen, Handler: paper.NewServer(runner, benchSource{iss}, o.Token).Handler(), ReadHeaderTimeout: 10 * time.Second}

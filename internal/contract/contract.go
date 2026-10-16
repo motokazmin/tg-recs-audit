@@ -181,6 +181,16 @@ type BondData interface {
 	BondFlows(secid string) ([]BondFlow, error)
 }
 
+// Auction — итог аукциона размещения ОФЗ за день (доска PACT) по одному выпуску.
+type Auction struct {
+	SecID    string
+	Day      time.Time
+	AvgPrice float64 // средневзвешенная, % номинала (VALUE/VOLUME): по ней исполняется неконкурентная заявка
+	AccInt   float64 // НКД на бумагу, руб.
+	Face     float64
+	Value    float64 // объём размещения, руб.
+}
+
 // Rate — официальный курс валюты к рублю на день.
 type Rate struct {
 	Day   time.Time
