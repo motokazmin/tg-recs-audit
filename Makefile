@@ -21,6 +21,14 @@ diary: $(BIN)
 placements: $(BIN)
 	$(BIN) placements $(ARGS)
 
+# Сигналы по фьючерсам карточкой (0008/0009): make signals CHANNEL=t.me/Exper_Trading
+signals: $(BIN)
+	$(BIN) signals $(ARGS) $(CHANNEL)
+
+# Рекомендации дивидендов как событие (0010/0011): make divevents CHANNEL=t.me/divonline
+divevents: $(BIN)
+	$(BIN) divevents $(ARGS) $(CHANNEL)
+
 # Пригодна ли история канала: глубина, удалённые, правки, тикеры
 check-channel: $(BIN)
 	$(BIN) check-channel $(CHANNEL)
@@ -28,4 +36,4 @@ check-channel: $(BIN)
 test:
 	$(GO) test ./...
 
-.PHONY: run houses diary placements check-channel test
+.PHONY: run houses diary placements signals divevents check-channel test

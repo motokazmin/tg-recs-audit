@@ -70,10 +70,18 @@ app.runPortfolio
 и `BondFlows` → `placements.Evaluate` против LQDT → сводка с t по неделям размещения.
 `placements.Market` — порт на стороне потребителя.
 
+## Команды `signals` и `divevents`
+
+`signals` (0008/0009): `signals.Parse` — карточки сигналов по фьючерсам (инструмент-контракт →
+код FORTS: префикс + буква месяца + цифра года) → `signals.Simulate` на 10-минутках ISS
+(`moexiss.FuturesBars`, кэш по дню) — исполнение как в боте; диагностика «вход по рынку».
+`divevents` (0010/0011): `divevents.Parse` — посты «Рекомендованы дивиденды» → `Evaluate` на
+дневных барах против MCFTR; выплата подтверждается smart-lab.
+
 ## Граф зависимостей
 
 ```
-cmd/recaudit → app → feature/{ideas,portfolio,houses,diary,placements,channelcheck,historycheck,mentions} → contract
+cmd/recaudit → app → feature/{ideas,portfolio,houses,diary,placements,signals,divevents,channelcheck,historycheck,mentions} → contract
                   └→ infra/{tgweb,tgexport,moexiss,smartlab,cbr,ledgerfile}            → contract
 feature/portfolio → feature/ideas
 feature/houses → feature/{portfolio,ideas}

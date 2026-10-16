@@ -50,7 +50,7 @@ type Options struct {
 
 func ParseFlags(args []string) (Options, error) {
 	if len(args) == 0 {
-		return Options{}, fmt.Errorf("команда: run | houses | diary | placements | check-channel | check-history")
+		return Options{}, fmt.Errorf("команда: run | houses | diary | placements | signals | divevents | check-channel | check-history")
 	}
 	o := Options{Cmd: args[0]}
 	fs := flag.NewFlagSet(o.Cmd, flag.ContinueOnError)
@@ -116,6 +116,10 @@ func Run(o Options, out io.Writer) error {
 		return runDiary(o, iss, out)
 	case "placements":
 		return runPlacements(o, iss, out)
+	case "signals":
+		return runSignals(o, iss, out)
+	case "divevents":
+		return runDivEvents(o, iss, out)
 	case "check-channel":
 		return checkChannels(o, iss, out)
 	case "check-history":
