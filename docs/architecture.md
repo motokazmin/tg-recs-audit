@@ -93,6 +93,13 @@ app.runPortfolio
 и `BondFlows` → `placements.Evaluate` против LQDT → сводка с t по неделям размещения.
 `placements.Market` — порт на стороне потребителя. `moexiss.Bonds` — кэш сутки (paperd ждёт новые выпуски).
 
+## Команда `prefetch-shares` и скрипты разборов
+
+`prefetch-shares` — бары ISS и выплаты smart-lab по всем акциям биржи в кэш. Проверки по всему
+рынку (0014/0015) — `scripts/idea_*.py` поверх кэша (общая статистика — `scripts/eventstats.py`),
+догрузка ОФЗ, оферт и составов IMOEX — `scripts/fetch_*.py` (`data/cache/iss/{ofz,offers}`,
+`imoex-rebalances.json`). `divevents` пишет события канала в `data/analysis/divevents-<канал>.csv`.
+
 ## Команды `signals` и `divevents`
 
 `signals` (0008/0009): `signals.Parse` — карточки сигналов по фьючерсам (инструмент-контракт →

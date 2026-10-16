@@ -1,10 +1,13 @@
 package app
 
 import (
+	"encoding/csv"
 	"fmt"
 	"io"
+	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -85,6 +88,10 @@ func runDivEvents(o Options, iss *moexiss.Client, out io.Writer) error {
 		fmt.Fprintf(out, " %s %d;", k, skips[k])
 	}
 	fmt.Fprintln(out)
+
+	if err := writeDivEvents(filepath.Join(dataDir, "analysis", "divevents-"+channelSlug(o.Refs[0])+".csv"), rs); err != nil {
+		return err
+	}
 
 	exB := func(r divevents.Result) float64 { return r.RetB - r.MCB }
 	exA := func(r divevents.Result) float64 { return r.RetA - r.MCA }
@@ -173,6 +180,31 @@ func dividendPaid(sl *smartlab.Client, e divevents.Event) (bool, error) {
 		}
 	}
 	return false, nil
+}
+
+// writeDivEvents — события для проверок по всему рынку (0014): какие выплаты канал объявил.
+func writeDivEvents(path string, rs []divevents.Result) error {
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return err
+	}
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	w := csv.NewWriter(f)
+	_ = w.Write([]string{"secid", "post_id", "posted_at", "last_buy", "div", "entry_day", "ret_b", "mcftr_b", "paid", "skip"})
+	for _, r := range rs {
+		entry := ""
+		if !r.EntryDay.IsZero() {
+			entry = r.EntryDay.Format(time.DateOnly)
+		}
+		_ = w.Write([]string{r.SecID, strconv.FormatInt(r.PostID, 10), r.PostedAt.Format(time.RFC3339), r.LastBuy.Format(time.DateOnly),
+			strconv.FormatFloat(r.Div, 'g', -1, 64), entry, strconv.FormatFloat(r.RetB, 'g', 6, 64), strconv.FormatFloat(r.MCB, 'g', 6, 64),
+			strconv.FormatBool(r.Paid), r.Skip})
+	}
+	w.Flush()
+	return w.Error()
 }
 
 func tercile(x []divevents.Result, key func(divevents.Result) float64) [3][]divevents.Result {

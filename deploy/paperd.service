@@ -1,18 +1,17 @@
-# systemd-юнит paperd на хосте бота. Установка — docs/paperd.md.
+# Пользовательский юнит paperd на хосте бота (apps@64.188.96.204): sudo у apps нет.
+# Установка — docs/paperd.md.
 [Unit]
 Description=paperd — проверка идей вперёд на виртуальных деньгах
 After=network-online.target
-Wants=network-online.target
 
 [Service]
-User=user1
-WorkingDirectory=/home/user1/tg-recs-audit
-# ADMIN_TOKEN, TG_BOT_TOKEN, TG_CHAT_ID — тот же файл, что у бота
+WorkingDirectory=/home/apps/tg-recs-audit
+# ADMIN_TOKEN, TG_BOT_TOKEN, TG_CHAT_ID — общий файл с ботом
 EnvironmentFile=/etc/trading-bot/env
-Environment=HTTP_LISTEN=0.0.0.0:8092
-ExecStart=/home/user1/tg-recs-audit/bin/paperd
+# порт флагом: HTTP_LISTEN из env-файла — порт бота (8091), EnvironmentFile перекрывает Environment=
+ExecStart=/home/apps/tg-recs-audit/bin/paperd -http-listen 0.0.0.0:8092
 Restart=on-failure
 RestartSec=30
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target

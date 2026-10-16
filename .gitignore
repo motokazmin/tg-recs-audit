@@ -5,3 +5,4 @@ data/exports/
 data/paperd.pid
 data/paperd.log
 data/paper/
+__pycache__/
