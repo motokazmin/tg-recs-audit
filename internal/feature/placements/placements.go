@@ -4,6 +4,7 @@ package placements
 
 import (
 	"math"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -27,6 +28,9 @@ type Bond struct {
 	Qual      bool
 	IssueSize float64 // руб.
 }
+
+// noteName — имена структурных нот, у которых в карточке есть COUPONFREQUENCY.
+var noteName = regexp.MustCompile(`(?i)структур|ПБО-\d+Р-К|ВТБ С-|ВТБ \(ПАО\) С-|RIB|CIB`)
 
 // Universe — отбор по регистрации 0006 из списка облигаций и карточек.
 func Universe(all []contract.Security, card func(string) (map[string]string, error), from, to time.Time) ([]Bond, map[string]int, error) {
@@ -60,13 +64,14 @@ func Universe(all []contract.Security, card func(string) (map[string]string, err
 			coupon = v
 		}
 		// Структурные ноты: купон 0.01% (СберИОС) — или купона в карточке нет вовсе (Сбер CIB-SN,
-		// ВЭБ.РФ ПБО-К, банковские ноты). У обычных выпусков, включая флоатеры, купон задан
-		// хотя бы суммой. NaN < 1 — ложь, поэтому без второй проверки ноты проходили (0007).
+		// ВЭБ.РФ ПБО-К, банковские ноты). NaN < 1 — ложь, поэтому без второй проверки ноты проходили (0007).
 		if coupon < 1 {
 			skip["купон < 1% (структурная)"]++
 			continue
 		}
-		if math.IsNaN(coupon) && c["COUPONVALUE"] == "" {
+		// Купона нет и у обычных выпусков: у флоатеров и у погашенных (ISS убирает купон из карточки).
+		// Их отличает COUPONFREQUENCY и имя не ноты; без этого выборка теряла 41% выпусков (0034, 0035).
+		if math.IsNaN(coupon) && c["COUPONVALUE"] == "" && (c["COUPONFREQUENCY"] == "" || noteName.MatchString(c["NAME"])) {
 			skip["купона в карточке нет (нота, дисконтная)"]++
 			continue
 		}
