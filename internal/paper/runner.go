@@ -95,7 +95,9 @@ func (r *Runner) runOne(s Strategy, asOf time.Time) Status {
 		st.Err = err.Error()
 		return st
 	}
-	fresh, err := ledger.Reconcile(old, ops, asOf)
+	// Вчерашний день — ещё не окончательный: в 02:00 МСК ISS отдаёт историю за вчера не целиком
+	// (30.10 не было торгов Воксиса за 29.10, утром появились и остановили placements).
+	fresh, err := ledger.Reconcile(old, ops, asOf.AddDate(0, 0, -1))
 	if err != nil {
 		st.Err, st.Stopped = err.Error(), true
 		return st

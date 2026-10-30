@@ -13,26 +13,28 @@ import (
 
 // Reconcile сверяет журнал с пересчётом и возвращает, что дописать.
 //
-// В журнал попадают только операции дней раньше cutoff (сегодня по Москве): день,
-// который ещё торгуется, может измениться. Записанные операции обязаны совпасть
-// с пересчётом один в один — иначе прошлое счёта поменялось (правка кода, правил,
-// таблицы корпоративных действий), и это решение человека, а не тихая перезапись.
+// Дописываются только операции дней раньше cutoff: день, данные за который ещё могут
+// измениться, ждёт. Записанные операции обязаны совпасть с пересчётом один в один — иначе
+// прошлое счёта поменялось (правка кода, правил, таблицы корпоративных действий), и это
+// решение человека, а не тихая перезапись. Сверяются они со всем пересчётом, а не только
+// с днями до cutoff: журнал, записанный при более позднем cutoff, остаётся верным.
 func Reconcile(ledger, computed []contract.Op, cutoff time.Time) ([]contract.Op, error) {
-	var settled []contract.Op
-	for _, op := range computed {
-		if op.Day < cutoff.Format(time.DateOnly) {
-			settled = append(settled, op)
-		}
-	}
-	if len(ledger) > len(settled) {
-		return nil, fmt.Errorf("в журнале %d операций, а пересчёт даёт %d до %s: прошлое изменилось", len(ledger), len(settled), cutoff.Format(time.DateOnly))
+	if len(ledger) > len(computed) {
+		return nil, fmt.Errorf("в журнале %d операций, а пересчёт даёт %d: прошлое изменилось", len(ledger), len(computed))
 	}
 	for i, old := range ledger {
-		if !same(old, settled[i]) {
-			return nil, fmt.Errorf("операция #%d в журнале не совпадает с пересчётом:\n  журнал:   %s\n  пересчёт: %s\nпрошлое счёта изменилось — разберитесь и заведите новый журнал", old.Seq, show(old), show(settled[i]))
+		if !same(old, computed[i]) {
+			return nil, fmt.Errorf("операция #%d в журнале не совпадает с пересчётом:\n  журнал:   %s\n  пересчёт: %s\nпрошлое счёта изменилось — разберитесь и заведите новый журнал", old.Seq, show(old), show(computed[i]))
 		}
 	}
-	return settled[len(ledger):], nil
+	var fresh []contract.Op
+	for _, op := range computed[len(ledger):] {
+		if op.Day >= cutoff.Format(time.DateOnly) {
+			break
+		}
+		fresh = append(fresh, op)
+	}
+	return fresh, nil
 }
 
 func same(a, b contract.Op) bool {

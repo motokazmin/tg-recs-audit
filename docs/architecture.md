@@ -59,7 +59,7 @@ app.runPortfolio
 |----------|-----|------|
 | `paper.Strategy` | `internal/paper/paper.go` | порт стратегии: `Ops`, `Mark` (оценка), счёт, старт, бенчмарк |
 | `paper.Memory` | там же | что стратегия уже видела (пост, подтверждение выплаты): удалённый пост не меняет прошлое |
-| `paper.Runner` | `runner.go` | пересчёт всех стратегий (ночью и по кнопке, не одновременно) → `ledger.Reconcile` → `Append`; прошлое изменилось → «ОСТАНОВЛЕНА» + тревога |
+| `paper.Runner` | `runner.go` | пересчёт всех стратегий (ночью и по кнопке, не одновременно) → `ledger.Reconcile` (дни раньше вчерашнего) → `Append`; прошлое изменилось → «ОСТАНОВЛЕНА» + тревога |
 | `paper.Curve`, `Trades`, `Summarize` | `account.go` | капитал по дням бенчмарка, сделки и превышение из журнала |
 | `paper.Server` | `server.go` | админка: сводка, страница стратегии (SVG, позиции, сделки, журнал), `/api/status`, `POST /run`; токен Bearer / `?access_token=` → cookie |
 | `paperstrat.Dividends`, `Placements`, `OFZAuctions` | `internal/feature/paperstrat` | стратегии A, B, C из 0013 и D из 0018 |
