@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ssh apps@64.188.96.204 *)"
+    ]
+  }
+}
